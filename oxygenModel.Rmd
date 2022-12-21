@@ -115,8 +115,6 @@ CtoO2 =  # Convert C values to DO values
 dt = 1/48     # Model time step (day fraction); 1/48 = 30 minutes; for now, has to be synchronized with 30 min met data
 nSteps = 10500   # Known apriori (number of records in the series)
 
-
-
 # Setup variables to track states and fluxes
 # Initialize values for state variables
 doPredic = doObs$DO[1] # Set the first value to the first observed value
