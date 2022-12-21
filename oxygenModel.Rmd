@@ -55,7 +55,7 @@ print(p4) # You have to print since these are in a loop
 
 
 
-## (3) Run the model
+## (3) Parameterize the model
 ```{r eval=TRUE, echo = TRUE, error=FALSE, warning=FALSE, message=FALSE}
 ## Model simulation of epilimnetic lake metabolism for Lake Mendota
 ## Observational data from NTL LTER
@@ -71,8 +71,6 @@ print(p4) # You have to print since these are in a loop
 # Settling = f(zMix,Phyto)
 
 
-
-
 # What data do we actually want to use in the model
 # Create vectors
 wTemp = wtr$temp0.5
@@ -81,32 +79,42 @@ PAR = PAR$PAR
 
 # (1) Setup constants and parameters
 # These three constants you might normally get from observational data
-phosphorus = 0.050 # Constant value of phosphorus (ug/L)
-DOC = 5.0  # Constant value for dissolved organic carbon (mg/L)
-zMix = 10  # Constant depth of the lake's upper mixed layer (m)
+phosphorus =  # Constant value of phosphorus (ug/L)
+DOC =   # Constant value for dissolved organic carbon (mg/L)
+zMix =   # Constant depth of the lake's upper mixed layer (m)
 
 # Model parameters
 # Fatm = k * (DO deviation from saturation) / mixed layer
-kDO = 1.0   # Parameter, gas exchange piston velocity (meters/day), often calculated from, e.g., wind speed
+kDO =    # Parameter, gas exchange piston velocity (meters/day), often calculated from, e.g., wind speed
 
 # NPP = PAR * P * pNPP * Theta^Temperature
-pNPP = 0.08  # Parameter, converts light and phosphorus to NPP (mgC/unitP/unitLight)
-thetaNPP = 1.2 # Parameter, Arrhenius coefficient for temperature adjustment for NPP
+pNPP =   # Parameter, converts light and phosphorus to NPP (mgC/unitP/unitLight)
+thetaNPP =  # Parameter, Arrhenius coefficient for temperature adjustment for NPP
 
 # RPhyto = Phyto * phytoR * Theta^Temperature
-phytoR = 0.8   # Parameter, 1st order decay of phytoplankton
-thetaR = 1.08  # Parameter, Arrhenius coefficient for temperature adjustment for respiration
+phytoR =    # Parameter, 1st order decay of phytoplankton
+thetaR =   # Parameter, Arrhenius coefficient for temperature adjustment for respiration
 
 # SettlingPhyto = Phyto * settlingPhyto / zMix
-settlingPhyto = 1.0 # Parmaeter, Settling in m/d
+settlingPhyto =  # Parmaeter, Settling in m/d
 
 # RDOC = DOC * docR
-docR = 0.02  # Parameter, 1st order decay of DOC
+docR =   # Parameter, 1st order decay of DOC
 
 # Other necessary constants for the model
-CtoO2 = 32/12 # Convert C values to DO values
+CtoO2 =  # Convert C values to DO values
+
+
+
+```
+
+
+
+## (4) Run the model
+```{r eval=TRUE, echo = TRUE, error=FALSE, warning=FALSE, message=FALSE}
 dt = 1/48     # Model time step (day fraction); 1/48 = 30 minutes; for now, has to be synchronized with 30 min met data
 nSteps = 10500   # Known apriori (number of records in the series)
+
 
 
 # Setup variables to track states and fluxes
@@ -121,6 +129,7 @@ RDOC = NA_real_  # Initialize respiration
 Rphyto = NA_real_  # Initialize respiration
 Rtot = NA_real_  # Initialize respiration
 dosat = NA_real_ # Initialize DO at saturation
+Settling = NA_real_ # Initialize Settling of phyto
 
 
 # Cycle through the model with 48 time steps per day (i.e., every 30 min)
@@ -135,30 +144,30 @@ for(i in 2:nSteps){
   }
   
   # Calculate the saturation value of dissolved oxygen as a function of temperature 
-  dosat[i] = -0.00006 * wTemp[i]^3 + 0.0069 * wTemp[i]^2 - 0.3906 * wTemp[i] + 14.578
+  dosat[i] = 
   
   # Atmospheric exchange
   # Fatm = k * (DO deviation from saturation) / mixed layer
-  fatm[i] = dt * kDO * (dosat[i] - doPredic[i-1]) / zMix # units: m/d * g/m3 * 1/m should be mg/L/30min 
+  fatm[i] =  # units: m/d * g/m3 * 1/m should be mg/L/30min 
   
   # Primary production
   # NPP = PAR * P * pNPP * Theta^Temperature
-  npp[i] = dt * PAR[i] * phosphorus * pNPP * thetaNPP^(wTemp[i] - 20)
+  npp[i] = 
   
   # Respiration terms
   # RDOC = [DOC] * docR
-  RDOC[i] = dt * DOC * docR
+  RDOC[i] = 
   # RPhyto = Phyto * phytoR * Theta^Temperature
-  Rphyto[i] = dt * phyto[i-1] * phytoR * thetaR^(wTemp[i] - 20)
-  Rtot[i] = RDOC[i] + Rphyto[i]
+  Rphyto[i] = 
+  Rtot[i] = 
   
   # SettlingPhyto = Phyto * settlingPhyto/zMix
-  Settling = dt * phyto[i-1] * settlingPhyto/zMix
+  Settling[i] = 
   
   # Mass balance equation for dissolved oxygen
-  doPredic[i] = doPredic[i-1] + fatm[i] + npp[i]*CtoO2 - Rtot[i]*CtoO2
+  doPredic[i] = 
   # Mass balance equaation for phytos
-  phyto[i] = phyto[i-1] + npp[i] - Rphyto[i] - Settling
+  phyto[i] = 
 }
 
 # Make dataframe of output vectors 
