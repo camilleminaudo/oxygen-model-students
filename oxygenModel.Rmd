@@ -1,7 +1,7 @@
 ---
-title: "metabModel"
-author: "Camille Minaudo"
-date: "2022-12-02"
+title: "Oxyegn Model"
+author: "this is my name"
+date: "this is the date of today"
 output: html_document
 ---
 
@@ -77,7 +77,12 @@ wTemp = wtr$temp0.5
 PAR = PAR$PAR
 
 
-# (1) Setup constants and parameters
+```
+
+
+
+## (4) Setup constants and parameters
+```{r eval=TRUE, echo = TRUE, error=FALSE, warning=FALSE, message=FALSE}
 # These three constants you might normally get from observational data
 phosphorus =  # Constant value of phosphorus (ug/L)
 DOC =   # Constant value for dissolved organic carbon (mg/L)
@@ -104,13 +109,11 @@ docR =   # Parameter, 1st order decay of DOC
 # Other necessary constants for the model
 CtoO2 =  # Convert C values to DO values
 
-
-
 ```
 
 
 
-## (4) Run the model
+## (5) Initializing the model
 ```{r eval=TRUE, echo = TRUE, error=FALSE, warning=FALSE, message=FALSE}
 dt = 1/48     # Model time step (day fraction); 1/48 = 30 minutes; for now, has to be synchronized with 30 min met data
 nSteps = 10500   # Known apriori (number of records in the series)
@@ -120,7 +123,7 @@ nSteps = 10500   # Known apriori (number of records in the series)
 doPredic = doObs$DO[1] # Set the first value to the first observed value
 phyto = 0.1 # g/m3
 
-# Initialize values for fluxes
+# Initializing values for fluxes
 fatm = NA_real_ # Initialize atmospheric exchange
 npp = NA_real_ # Initialize primary production
 RDOC = NA_real_  # Initialize respiration
@@ -130,6 +133,12 @@ dosat = NA_real_ # Initialize DO at saturation
 Settling = NA_real_ # Initialize Settling of phyto
 
 
+```
+
+
+
+## (6) Run the model after filling in the equations
+```{r eval=TRUE, echo = TRUE, error=FALSE, warning=FALSE, message=FALSE}
 # Cycle through the model with 48 time steps per day (i.e., every 30 min)
 for(i in 2:nSteps){
   # if water temp is missing, use previous value
@@ -185,7 +194,7 @@ head(out.model)
 
 
 
-## (5) Plot results
+## (7) Plot results
 ```{r echo = F, fig.cap = 'modelled DO'}
 # There are many ways to do this in ggplot. Ideally you'd want to convert the dataframes from wide to long, but the code below uses the wide format
 
@@ -234,7 +243,6 @@ p7 = ggplot(out.model %>% slice(-1)) +
 p5 / p6 / p7 + 
   plot_annotation(tag_levels = 'a', tag_suffix = ')') & 
   theme(plot.tag = element_text(size = 8))
-
 
 
 ```
