@@ -10,6 +10,7 @@ output: html_document
 ## Loading libraries
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+# install.packages(c("readr", "tidyverse", "patchwork"))
 library(tidyverse)
 library(patchwork)
 ```
@@ -71,12 +72,10 @@ print(p4) # You have to print since these are in a loop
 # Settling = f(zMix,Phyto)
 
 
-# What data do we actually want to use in the model
+# What data do we actually want to use in the model?
 # Create vectors
-wTemp = wtr$temp0.5
-PAR = PAR$PAR
-
-
+wTemp = wtr$temp0.5 # water temperature at 0.5 m depth
+PAR = PAR$PAR       # Photosynthetically Active Radiation (PAR) at the water surface
 ```
 
 
