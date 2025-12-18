@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 # install.packages(c("readr", "tidyverse", "patchwork"))
 library(tidyverse)
 library(patchwork)
+library(openair)
 ```
 
 
@@ -186,6 +187,13 @@ out.model = doObs %>% slice(1:nSteps) %>%
          Rphyto = Rphyto, 
          Rtot = Rtot, 
          dosat = dosat)
+
+# Let's calculate daily averages
+out.model$date <- as.Date(out.model$dateTime)
+out.model_daily <- openair::timeAverage(mydata = out.model, avg.time = "day", statistic = "mean")
+out.model_daily_sum <- openair::timeAverage(mydata = out.model[,c("date","npp","Rtot","fatm")], avg.time = "day", statistic = "sum")
+
+
 # Let's take a look at the modelled data!
 head(out.model)
 
@@ -197,25 +205,23 @@ head(out.model)
 ```{r echo = F, fig.cap = 'modelled DO'}
 # There are many ways to do this in ggplot. Ideally you'd want to convert the dataframes from wide to long, but the code below uses the wide format
 
-# Plot the predictions
+# Plot the predictions at 30min scale
 p5 = ggplot(out.model) +
   geom_line(aes(x = dateTime, y = DO, color = 'black')) +
-  geom_line(aes(x = dateTime, y = dosat, color = 'grey50')) +
-  geom_line(aes(x = dateTime, y = doPredic, color = 'red4')) +
-  geom_line(aes(x = dateTime, y = phyto, color = 'darkgreen')) +
+  geom_line(aes(x = dateTime, y = doPredic, color = 'red')) +
   scale_color_identity(guide = "legend",
                        name = 'Predictions',
-                       labels = c("Observed", "Phyto", "Saturation","Modeled")) +
+                       labels = c("Observed", "Modeled")) +
   ylab('DO (mg/L)') +
   scale_x_datetime(date_labels = '%b', breaks = 'month') +
   theme_bw(base_size = 9) +
   theme(axis.title.x = element_blank())
 
 # Plot the fluxes
-p6 = ggplot(out.model) +
-  geom_line(aes(x = dateTime, y = npp/dt, color = 'green4')) +
-  geom_line(aes(x = dateTime, y = -Rtot/dt, color = 'red4')) +
-  geom_line(aes(x = dateTime, y = fatm/dt, color = 'black')) +
+p6 = ggplot(out.model_daily_sum) +
+  geom_line(aes(x = date, y = npp/dt, color = 'green4')) +
+  geom_line(aes(x = date, y = -Rtot/dt, color = 'red4')) +
+  geom_line(aes(x = date, y = fatm/dt, color = 'black')) +
   scale_color_identity(guide = "legend",
                        name = 'Fluxes',
                        labels = c("Fatm", "NPP", "Rtot")) +
@@ -238,10 +244,15 @@ p7 = ggplot(out.model %>% slice(-1)) +
   theme_bw(base_size = 9) +
   theme(axis.title.x = element_blank())
 
+print(p5)
+print(p6)
+print(p7)
+
 # Patchwork plots together
-p5 / p6 / p7 + 
-  plot_annotation(tag_levels = 'a', tag_suffix = ')') & 
-  theme(plot.tag = element_text(size = 8))
+# p5 / p6 / p7 + 
+#   plot_annotation(tag_levels = 'a', tag_suffix = ')') & 
+#   theme(plot.tag = element_text(size = 8))
+
 
 
 ```
